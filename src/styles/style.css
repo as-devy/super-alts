@@ -19,7 +19,6 @@ body {
 }
 
 body {
-  font-family: "Cairo", sans-serif;
   color: var(--foreground);
   background: var(--background);
   -webkit-font-smoothing: antialiased;
@@ -27,6 +26,7 @@ body {
 }
 
 * {
+  font-family: "Cairo", sans-serif;
   box-sizing: border-box;
   padding: 0;
   margin: 0 !important;
