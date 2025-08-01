@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { formatTimestamp } from './utils';
+import { formatTimestamp } from '../../../utils/utils';
 
 export default function AddCouponModal({ setCoupons, setError }) {
     const [coupon, setCoupon] = useState("")

@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { useLicenses } from "./useLicenses";
+import { useLicenses } from "../../../utils/useLicenses";
 
 function License({ license, i, renderForAdmin, productStatus, productLicenseStatus, tooltipRefs, }) {
     const copyBtnRef = useRef(null);

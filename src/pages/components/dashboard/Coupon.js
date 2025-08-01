@@ -1,4 +1,4 @@
-import { formatTimestamp } from './utils';
+import { formatTimestamp } from '../../../utils/utils';
 
 export default function Coupon({ coupon, setCurrentModifyCoupon }) {
 

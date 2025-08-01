@@ -5,7 +5,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import RenderLicenses from '../components/dashboard/RenderLicenses'
 import AgreeModals from "../components/dashboard/AgreeModals";
 import SideBar from "../components/dashboard/SideBar";
-import { useLicenses } from "../components/dashboard/useLicenses";
+import { useLicenses } from "../../utils/useLicenses";
 
 function Dashboard() {
     const { data: session, status } = useSession();

@@ -4,7 +4,7 @@ import RenderLicenses from '../../components/dashboard/RenderLicenses'
 import AddLicenseModal from "src/pages/components/dashboard/AddLicenseModal";
 import AgreeModals from "../../components/dashboard/AgreeModals";
 import { ToastContainer } from 'react-toastify';
-import { useLicenses } from "../../components/dashboard/useLicenses";
+import { useLicenses } from "../../../utils/useLicenses";
 import { useState } from "react";
 
 export default function licenses() {
