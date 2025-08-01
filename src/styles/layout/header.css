@@ -1,0 +1,192 @@
+header {
+    padding: 20px 0;
+}
+
+header .container {
+    margin: 0 auto !important;
+}
+
+header .main_nav img {
+    width: 200px;
+}
+
+header .main_nav {
+    background-color: #1b1c1f;
+    padding: 40px 15px;
+    width: 80%;
+    height: 60px;
+    border: 1px solid #5b5c5e;
+    display: flex;
+    align-items: center;
+    border-radius: 3rem;
+    justify-content: space-between;
+}
+
+header .main_nav nav {
+    display: flex;
+    align-items: center;
+    /* margin-right: 50px !important; */
+}
+
+header .main_nav ul {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    color: #8ea3ff;
+    font-weight: 500;
+
+}
+
+header .main_nav ul a {
+    padding: 5px;
+}
+
+header .main_nav ul li {
+    position: relative;
+}
+
+header .main_nav ul li::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0%;
+    height: 2px;
+    border-radius: 10px;
+    background-color: #8ea3ff;
+    transition: width .3s ease-in-out;
+}
+
+header .main_nav ul li:hover::after,
+header .main_nav ul li.active::after {
+    width: 80%;
+}
+
+header .main_nav .shoping-cart-btn {
+    background: none;
+    border: none;
+    border: 1px solid #5b5c5e;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: .3s;
+}
+
+header .main_nav .shoping-cart-btn:hover {
+    background: #36393f;
+}
+
+header .main_nav .shoping-cart-btn img {
+    width: 50px;
+    height: 50px;
+}
+
+header .main_nav .dsh-link {
+    background: none;
+    border: none;
+    border: 1px solid #5b5c5e;
+    padding: 6px 15px;
+    border-radius: 1.2rem;
+    cursor: pointer;
+    transition: .3s;
+}
+
+header .main_nav .dsh-link:hover{
+    background-color: #33353d;
+}
+
+header .main_nav .discord_auth {
+    background: transparent;
+    color: #fff;
+    border: 1px solid #727477;
+    padding: 6px 13px;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    margin-right: 5px !important;
+    border-radius: .3rem;
+    transition: .3s;
+}
+
+header .main_nav .discord_auth:hover {
+    background: #405acdbf;
+}
+
+.mb-menu {
+    position: fixed;
+    width: 30%;
+    background-color: #fff;
+    left: 0;
+    top: 0;
+    height: 100vh;
+    z-index: 999999;
+    padding: 20px;
+    background: rgb(83 83 83 / 20%);
+    backdrop-filter: blur(7px);
+    -webkit-backdrop-filter: blur(4px);
+    border-radius: 1rem;
+    border: 1px solid rgb(255 255 255 / 57%);
+    transform: translateX(-50vw);
+    opacity: 0;
+    visibility: hidden;
+    transition: 0.5s;
+}
+
+.mb-menu.active {
+    transform: translateX(0);
+    opacity: 1;
+    visibility: visible;
+}
+
+.mb-menu .close {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    background-color: #131313;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    right: 20px;
+    border: 1px solid rgb(255 255 255 / 57%);
+}
+
+.mb-menu .logo {
+    text-align: center;
+}
+
+.mb-menu ul {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.mb-menu ul li {
+    border-bottom: 1px solid #8ea3ea;
+    padding-bottom: 8px;
+    transition: .3s;
+}
+
+.mb-menu ul li.active,
+.mb-menu ul li:hover {
+    color: #8ea3ff;
+}
+
+header .mb_menu_btn {
+    width: 40px;
+    height: 40px;
+    background: #1b1c1f;
+    border: 1px solid #595a5c;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: .3s;
+    display: none;
+}
+
+header .mb_menu_btn:hover {
+    background: #36393f;
+}

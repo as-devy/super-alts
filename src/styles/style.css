@@ -1,0 +1,124 @@
+/* @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap'); */
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@200..1000&display=swap');
+
+:root {
+  --background: #151619;
+  --foreground: #ffffff;
+}
+
+html,
+body {
+  max-width: 100vw;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+#__next {
+  width: 100%;
+  min-height: 100vh;
+}
+
+body {
+  font-family: "Cairo", sans-serif;
+  color: var(--foreground);
+  background: var(--background);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0 !important;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+ul {
+  list-style: none;
+  padding: 0 !important;
+}
+
+section {
+  padding: 3rem 0;
+  min-height: 50vh;
+}
+
+.preloader{
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.preloader .icon{
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.preloader .logo{
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+}
+
+.header-text {
+  margin-bottom: 40px !important;
+  display: flex;
+  justify-content: center;
+}
+
+.head-img img {
+  width: 270px;
+}
+
+.gradient-text {
+  background: linear-gradient(270deg, #5e2dd2, #4269f6);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  position: relative;
+  z-index: 999;
+  padding: 0 3px;
+}
+
+.ziina-button {
+  background-color: #8b25d3;
+  color: #fff;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.ziina-button:hover {
+  background-color: #a347e6;
+}
+
+.payment_btns.disbaled {
+  opacity: .5;
+  position: relative;
+}
+
+.payment_btns.disbaled::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9999;
+  cursor: no-drop;
+}
+
+#paymentStatusModal .modal-dialog {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  margin: 0 auto !important;
+}
