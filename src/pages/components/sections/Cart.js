@@ -5,8 +5,6 @@ export default function Cart({ cart, setCart }) {
         setCart(prev => prev.filter(item => item.productCode !== productCode));
     }
 
-    console.log(process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID)
-
     const getCartTotalPrice = () =>
         cart.reduce((total, product) =>
             total + Number(product.productSale || product.productPrice), 0
