@@ -23,10 +23,11 @@ body {
   background: var(--background);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  font-family: "Cairo", sans-serif !important;
 }
 
 * {
-  font-family: "Cairo", sans-serif;
+  font-family: "Cairo", sans-serif !important;
   box-sizing: border-box;
   padding: 0;
   margin: 0 !important;
