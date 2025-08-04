@@ -41,7 +41,6 @@ function License({ license, i, renderForAdmin, productStatus, productLicenseStat
         });
 
         const data = await res.json();
-        console.log(data)
     }
 
     return (

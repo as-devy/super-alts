@@ -23,7 +23,6 @@ export default async function handler(req, res) {
   });
 
   const data = await ziinaRes.json();
-  // console.log(data)
   if (ziinaRes.ok) {
     res.status(200).json(data);
   } else {

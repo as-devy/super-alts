@@ -42,9 +42,9 @@ export default function AddProductModal({ setProducts }) {
         });
 
         const data = await res.json();
-        console.log(data)
-        // INCOMPLETE
-        // setProducts(prevProducts=> [...prevProducts, newProduct])
+        if (data.message) {
+            setProducts(prevProducts => [...prevProducts, newProduct])
+        }
     }
 
     return (
@@ -73,7 +73,7 @@ export default function AddProductModal({ setProducts }) {
                         <input onChange={(e) => setProductSale(e.target.value)} value={productSale} type="text" className="form-control bg-secondary text-white border-0" placeholder="productSale" />
 
                         <input onChange={(e) => setCreatedBy(e.target.value)} value={createdBy} type="text" className="form-control bg-secondary text-white border-0" placeholder="createdBy" />
-                        
+
                         <div className="form-check d-flex flex-row-reverse justify-content-end align-items-center gap-3 w-auto">
                             <input onChange={(e) => setProductBest(e.target.checked)} checked={productBest} type="checkbox" className="form-check-input" id="productBest" />
                             <label className="form-check-label text-white" htmlFor="productBest">الأفضل مبيعًا</label>

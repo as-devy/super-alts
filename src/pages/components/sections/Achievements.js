@@ -16,13 +16,10 @@ const Achievements = () => {
     
                 const data = await res.json();
                 setAchives(data[0]);
-                console.log(achives)
             }
     
             fetchStats();
         }, []);
-
-        // console.log(achives)
 
     return (
         <section className="achives" id="achives">

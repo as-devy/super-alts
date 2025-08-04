@@ -26,7 +26,6 @@ export default function AddCouponModal({ setCoupons, setError }) {
         });
 
         const data = await res.json();
-        console.log(data)
         if (data.error){
             setError(data.error)
             return;

@@ -39,7 +39,6 @@ const Header = ({ activeLink }) => {
                 if (section) {
                     const rect = section.getBoundingClientRect();
                     if (rect.top <= 100 && rect.bottom >= 100) {
-                        console.log(id)
                         current = id;
                         break;
                     }
