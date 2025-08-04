@@ -33,6 +33,10 @@ body {
   margin: 0 !important;
 }
 
+iframe{
+  width: 100% !important;
+}
+
 a {
   color: inherit;
   text-decoration: none;
