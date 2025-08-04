@@ -1,14 +1,14 @@
-/** @type {import('next').NextConfig} */
+const isDev = process.env.NODE_ENV === 'development';
 
 const ContentSecurityPolicy = `
   default-src 'self';
   script-src 'self' https://www.paypal.com https://cdn.jsdelivr.net 'unsafe-inline' 'unsafe-eval';
-  style-src 'self' https://fonts.googleapis.com https://cdnjs.cloudflare.com 'unsafe-inline';
-  style-src-elem 'self' https://fonts.googleapis.com https://cdnjs.cloudflare.com;
+  style-src 'self' https://fonts.googleapis.com https://cdnjs.cloudflare.com ${isDev ? "'unsafe-inline'" : ''};
+  style-src-elem 'self' https://fonts.googleapis.com https://cdnjs.cloudflare.com ${isDev ? "'unsafe-inline'" : ''};
   font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com;
   img-src 'self' data: https:;
-  connect-src 'self' https://www.paypal.com;
-  frame-src 'self' https://www.paypal.com;
+  connect-src 'self' https://www.paypal.com https://www.sandbox.paypal.com;
+  frame-src 'self' https://www.paypal.com https://www.sandbox.paypal.com;
 `;
 
 const nextConfig = {
@@ -30,4 +30,3 @@ const nextConfig = {
 };
 
 export default nextConfig;
-
