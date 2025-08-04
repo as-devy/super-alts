@@ -1,7 +1,9 @@
 'use client';
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import Link from 'next/link';
 import { signIn, useSession } from "next-auth/react";
+
+const sections = ["home", "achives", "about-us", "products", "testimonials"];
 
 const Header = ({ activeLink }) => {
     const { data: session } = useSession();
@@ -13,6 +15,8 @@ const Header = ({ activeLink }) => {
     const toggleMenu = () => {
         mbMenu.current.classList.toggle('active');
     }
+
+    const [activeSection, setActiveSection] = useState(activeLink || "home");
 
     useEffect(() => {
         function handleDocumentClick(e) {
@@ -27,6 +31,27 @@ const Header = ({ activeLink }) => {
         return () => document.removeEventListener('mousedown', handleDocumentClick);
     }, []);
 
+    useEffect(() => {
+        const handleScroll = () => {
+            let current = "home";
+            for (const id of sections) {
+                const section = document.getElementById(id);
+                if (section) {
+                    const rect = section.getBoundingClientRect();
+                    if (rect.top <= 100 && rect.bottom >= 100) {
+                        console.log(id)
+                        current = id;
+                        break;
+                    }
+                }
+            }
+            setActiveSection(current);
+        };
+
+        window.addEventListener("scroll", handleScroll);
+        return () => window.removeEventListener("scroll", handleScroll);
+    }, []);
+
     return (
         <header dir="ltr">
             <div className='container d-flex justify-content-center align-items-center'>
@@ -36,11 +61,21 @@ const Header = ({ activeLink }) => {
                     </div>
                     <nav>
                         <ul className="nav_links">
-                            <li className={activeLink == "home" ? "active" : ""}><Link href="/">Home</Link></li>
-                            <li><a href="#">Achievments</a></li>
-                            <li><a href="#">About</a></li>
-                            <li className={activeLink == "products" ? "active" : ""}><Link href="/products">Products</Link></li>
-                            <li><a href="#">Testimonials</a></li>
+                            <li className={activeSection === "home" ? "active" : ""}>
+                                <Link href="/">Home</Link>
+                            </li>
+                            <li className={activeSection === "achives" ? "active" : ""}>
+                                <a href="#achives">Achievements</a>
+                            </li>
+                            <li className={activeSection === "about-us" ? "active" : ""}>
+                                <a href="#about-us">About</a>
+                            </li>
+                            <li className={activeSection === "products" ? "active" : ""}>
+                                <Link href="/products">Products</Link>
+                            </li>
+                            <li className={activeSection === "testimonials" ? "active" : ""}>
+                                <a href="#testimonials">Testimonials</a>
+                            </li>
                         </ul>
                     </nav>
                     <div className="d-flex align-items-center gap-3">
@@ -77,11 +112,21 @@ const Header = ({ activeLink }) => {
                     <img src="/assets/logo.png" alt="" />
                 </div>
                 <ul>
-                    <li className={activeLink == "home" ? "active" : ""}><Link href="/">Home</Link></li>
-                    <li><a href="#">Achievments</a></li>
-                    <li><a href="#">About</a></li>
-                    <li className={activeLink == "products" ? "active" : ""}><Link href="/products">Products</Link></li>
-                    <li><a href="#">Testimonials</a></li>
+                    <li className={activeSection === "home" ? "active" : ""}>
+                        <Link href="/">Home</Link>
+                    </li>
+                    <li className={activeSection === "achives" ? "active" : ""}>
+                        <a href="#achives">Achievements</a>
+                    </li>
+                    <li className={activeSection === "about-us" ? "active" : ""}>
+                        <a href="#about-us">About</a>
+                    </li>
+                    <li className={activeSection === "products" ? "active" : ""}>
+                        <Link href="/products">Products</Link>
+                    </li>
+                    <li className={activeSection === "testimonials" ? "active" : ""}>
+                        <a href="#testimonials">Testimonials</a>
+                    </li>
                 </ul>
             </div>
         </header>

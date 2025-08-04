@@ -17,7 +17,7 @@ export default function Document() {
         <link rel="apple-touch-icon" sizes="192x192" href="/assets/favicons/favicon-192.png" />
         <link rel="apple-touch-icon" sizes="256x256" href="/assets/favicons/favicon-256.png" />
         <link rel="apple-touch-icon" sizes="512x512" href="/assets/favicons/favicon-512.png" />
-        <title>Super Alts</title>
+        {/* <title>Super Alts</title> */}
       </Head>
       <body>
         <Main />

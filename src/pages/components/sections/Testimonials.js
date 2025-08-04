@@ -1,41 +1,30 @@
+import { useState, useEffect } from "react";
+
 function Testimonials() {
-    const testimonials = [
-        {
-            content: `افضل متجر تعاملت معاه من ان بديت اشتري من 
-الانترنيت سريع جدا في تسليم ودعم فني ممتاز
-انصح كل واحد يشتري من متجر`,
-            author: "- محمد بن زايد"
-        },
-        {
-            content: `افضل متجر تعاملت معاه من ان بديت اشتري من 
-الانترنيت سريع جدا في تسليم ودعم فني ممتاز
-انصح كل واحد يشتري من متجر`,
-            author: "- محمد بن زايد"
-        },
-        {
-            content: `افضل متجر تعاملت معاه من ان بديت اشتري من 
-الانترنيت سريع جدا في تسليم ودعم فني ممتاز
-انصح كل واحد يشتري من متجر`,
-            author: "- محمد بن زايد"
-        },
-        {
-            content: `افضل متجر تعاملت معاه من ان بديت اشتري من 
-الانترنيت سريع جدا في تسليم ودعم فني ممتاز
-انصح كل واحد يشتري من متجر`,
-            author: "- محمد بن زايد"
-        },
-        {
-            content: `افضل متجر تعاملت معاه من ان بديت اشتري من 
-الانترنيت سريع جدا في تسليم ودعم فني ممتاز
-انصح كل واحد يشتري من متجر`,
-            author: "- محمد بن زايد"
-        },
-    ];
+    const [testimonials, setTestimonials] = useState([])
+
+    useEffect(() => {
+        async function fetchTestimonials() {
+            const res = await fetch('/api/testimonials/testimonials', {
+                credentials: 'include'
+            });
+
+            if (!res.ok) {
+                const err = await res.json();
+                throw new Error(err.error || 'Failed to fetch testimonials');
+            }
+
+            const data = await res.json();
+            setTestimonials(data);
+        }
+
+        fetchTestimonials();
+    }, []);
 
     const repeatedtestimonials = Array(10).fill(testimonials).flat();
 
     return (
-        <section className="testimonials">
+        <section className="testimonials" id="testimonials">
             <div className="container-fluid" style={{ padding: '0' }}>
                 <div className="header-text head-img">
                     <img src="/assets/testimonials-header.png" alt="products-header" className="img-fluid" />
@@ -45,9 +34,18 @@ function Testimonials() {
                         {repeatedtestimonials.map((testimonial, i) => (
                             <div className="testimonial d-flex flex-column align-items-center" key={i} style={{ minWidth: '100px' }}>
                                 <img src="/assets/testimonial-box.png" alt="testimonial-wrapper" className="wrapper-img mb-2" />
-                                <img src="/assets/stars-icon.png" alt="stars-icons" className="stars-icon mb-2" />
-                                <p className="txt content">{testimonial.content}</p>
-                                <p className="txt author">{testimonial.author}</p>
+                                <div className="stars-icon mb-2">
+                                    {[...Array(testimonial.stars)].map((_, index) => (
+                                        <img
+                                            key={index}
+                                            src="/assets/stars-icon.png"
+                                            alt="stars-icon"
+                                        />
+                                    ))}
+                                </div>
+
+                                <p className="txt content">{testimonial.feedback}</p>
+                                <p className="txt author">{testimonial.username}</p>
                             </div>
                         ))}
                     </div>

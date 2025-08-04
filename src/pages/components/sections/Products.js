@@ -25,7 +25,7 @@ const Products = () => {
     const repeatedProducts = Array(10).fill(products).flat();
 
     return (
-        <section className="products">
+        <section className="products" id="products">
             <div className="container-fluid" style={{ padding: '0' }}>
                 <div className="header-text head-img">
                     <img src="/assets/products-header.png" alt="products-header" className="img-fluid" />

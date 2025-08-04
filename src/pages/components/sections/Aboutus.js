@@ -1,6 +1,6 @@
 const Aboutus = () => {
     return (
-        <section className="about-us">
+        <section className="about-us" id="about-us">
             <div className="container-fluid">
                 <div className="row align-items-center justify-content-center flex-column-reverse flex-md-row">
                     <div className="col-12 col-md-6 text-content mb-4 mb-md-0">

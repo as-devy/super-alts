@@ -1,5 +1,8 @@
 header {
     padding: 20px 0;
+    position: fixed;
+    width: 100%;
+    z-index: 9999;
 }
 
 header .container {
@@ -11,14 +14,18 @@ header .main_nav img {
 }
 
 header .main_nav {
-    background-color: #1b1c1f;
+    background: rgb(18 18 18 / 68%);
+    border-radius: 3rem;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(6.9px);
+    -webkit-backdrop-filter: blur(6.9px);
+    border: 1px solid rgba(136, 136, 136, 0.12);
     padding: 40px 15px;
     width: 80%;
     height: 60px;
     border: 1px solid #5b5c5e;
     display: flex;
     align-items: center;
-    border-radius: 3rem;
     justify-content: space-between;
 }
 
@@ -91,7 +98,7 @@ header .main_nav .dsh-link {
     transition: .3s;
 }
 
-header .main_nav .dsh-link:hover{
+header .main_nav .dsh-link:hover {
     background-color: #33353d;
 }
 
