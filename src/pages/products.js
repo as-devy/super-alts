@@ -2,6 +2,8 @@ import Head from "next/head";
 import { useState, useRef, useEffect, use } from "react";
 import { useRouter } from 'next/router';
 import { useSession } from "next-auth/react";
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import Header from "./components/layouts/Header";
 import Cart from "./components/sections/Cart";
 
@@ -36,16 +38,28 @@ export default function Products({ cart, setCart }) {
 
     useEffect(() => {
         async function fetchUserLicenses() {
-            const res = await fetch("/api/licenses/licenses", { credentials: 'include' });
-            if (!res.ok) {
-                const err = await res.json();
-                throw new Error(err.error || 'Failed to fetch licenses');
+            // Only fetch licenses if user is authenticated
+            if (session) {
+                try {
+                    const res = await fetch("/api/licenses/licenses", { credentials: 'include' });
+                    if (!res.ok) {
+                        const err = await res.json();
+                        throw new Error(err.error || 'Failed to fetch licenses');
+                    }
+                    const data = await res.json();
+                    setUserLicensess(data);
+                } catch (error) {
+                    console.error('Failed to fetch user licenses:', error);
+                    // Set empty array if fetch fails
+                    setUserLicensess([]);
+                }
+            } else {
+                // Clear licenses if user is not authenticated
+                setUserLicensess([]);
             }
-            const data = await res.json();
-            setUserLicensess(data);
         }
         fetchUserLicenses();
-    }, []);
+    }, [session]); // Add session as dependency
 
     useEffect(() => {
         if (!payment_intent_id) return;
@@ -122,8 +136,48 @@ export default function Products({ cart, setCart }) {
     }, []);
 
     const handleAddToCart = (product) => {
+        if (!session) {
+            toast.error("يجب تسجيل الدخول أولاً لإضافة المنتجات إلى السلة");
+            return;
+        }
         setCart([...cart, product]);
+        toast.success(`تم إضافة "${product.productName}" إلى السلة بنجاح!`);
     }
+
+    // Helper function to render add to cart button based on user state
+    const renderAddToCartButton = (product) => {
+        // If user is authenticated, check their licenses and cart
+        if (session) {
+            const isOwned = userLicenses.some(license => license.productCode === product.productCode);
+            const inCart = cart.some(item => item.productCode === product.productCode);
+
+            if (isOwned) {
+                return (
+                    <button className="btn btn-success btn-sm d-flex align-items-center gap-1" style={{ opacity: "0.8" }} disabled>
+                        <i className="fa-solid fa-check"></i>
+                        تم الشراء
+                    </button>
+                );
+            }
+
+            if (inCart) {
+                return (
+                    <button className="btn btn-success btn-sm d-flex align-items-center gap-1" style={{ cursor: 'no-drop', opacity: "0.5" }} disabled>
+                        <i className="fa-solid fa-cart-shopping"></i>
+                        فى السلة
+                    </button>
+                );
+            }
+        }
+
+        // Default: Show add to cart button (for unauthenticated users or available products)
+        return (
+            <button className="btn btn-success btn-sm d-flex align-items-center gap-1" onClick={() => handleAddToCart(product)}>
+                <i className="fa-solid fa-cart-shopping"></i>
+                إضافة للسلة
+            </button>
+        );
+    };
 
     return (
         <main className="products-page">
@@ -153,28 +207,12 @@ export default function Products({ cart, setCart }) {
                             <div className="content p-2">
                                 <div className="text">
                                     <h5>{product.productName}</h5>
-                                    <p>{product.productDesc}</p>
+                                    <p>{product.productDesc || "لا يوجد وصف"}</p>
                                 </div>
                                 <div className="info d-flex justify-content-between align-items-center">
                                     <span className="price">{product.productPrice}$</span>
                                     <div className="btns d-flex gap-2">
-                                        {
-                                            userLicenses.some(userLicense => userLicense.productCode === product.productCode) ? (
-                                                <button className="btn btn-success btn-sm d-flex align-items-center gap-1" style={{ opacity: "0.8" }}>
-                                                    تم الشراء
-                                                </button>
-                                            ) : cart.some(item => item.productCode === product.productCode) ? (
-                                                <button className="btn btn-success btn-sm d-flex align-items-center gap-1" style={{ cursor: 'no-drop', opacity: "0.5" }}>
-                                                    <i className="fa-solid fa-cart-shopping"></i>
-                                                    فى السلة
-                                                </button>
-                                            ) : (
-                                                <button className="btn btn-success btn-sm d-flex align-items-center gap-1" onClick={() => handleAddToCart(product)}>
-                                                    <i className="fa-solid fa-cart-shopping"></i>
-                                                    إضافة للسلة
-                                                </button>
-                                            )
-                                        }
+                                        {renderAddToCartButton(product)}
 
                                         <button
                                             className="btn btn-info btn-sm info-btn"
@@ -208,17 +246,7 @@ export default function Products({ cart, setCart }) {
                             <p> - {selectedProduct.productDesc || "لا يوجد وصف"}</p>
                         </div>
                         <div className="row_text" style={{ borderTop: "1px solid #777777", paddingTop: "20px" }}>
-                            {cart.some(item => item.productCode === selectedProduct.productCode) ? (
-                                <button className="btn btn-success btn-sm d-flex justify-content-center align-items-center gap-1" style={{ cursor: 'no-drop', opacity: "0.5" }}>
-                                    <i className="fa-solid fa-cart-shopping"></i>
-                                    فى السلة
-                                </button>
-                            ) : (
-                                <button className="btn btn-success btn-sm d-flex justify-content-center align-items-center gap-1" onClick={() => handleAddToCart(product)}>
-                                    <i className="fa-solid fa-cart-shopping"></i>
-                                    إضافة للسلة
-                                </button>
-                            )}
+                            {renderAddToCartButton(selectedProduct)}
                         </div>
                     </div>
                 </div>
@@ -250,6 +278,16 @@ export default function Products({ cart, setCart }) {
                 </div>
             </div>
 
+            <ToastContainer
+                position="bottom-right"
+                autoClose={3000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                pauseOnFocusLoss
+                pauseOnHover
+                theme="colored"
+            />
 
         </main>
     );

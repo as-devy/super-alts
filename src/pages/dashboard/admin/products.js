@@ -3,10 +3,32 @@ import SideBar from "../../components/dashboard/SideBar";
 import { useState, useEffect } from "react";
 import AddProductModal from "src/pages/components/dashboard/AddProductModal";
 import AgreeModals from "../../components/dashboard/AgreeModals";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/router";
 
-export default function products() {
+export default function Products() {
     const [products, setProducts] = useState([]);
     const [currentModifyProductCode, setCurrentModifyProductCode] = useState([]);
+
+    const { data: session, status } = useSession();
+    const router = useRouter();
+
+    // 🔒 Protect admin route
+    useEffect(() => {
+        if (status === "authenticated" && session?.user?.id !== process.env.NEXT_PUBLIC_ADMIN_ID) {
+            router.replace('/dashboard');
+        }
+    }, [status, session, router]);
+
+    // Show loading until session is resolved
+    if (status === "loading") {
+        return <p>Loading...</p>;
+    }
+
+    // Block access until redirect completes
+    if (status === "authenticated" && session?.user?.id !== process.env.NEXT_PUBLIC_ADMIN_ID) {
+        return null;
+    }
 
     useEffect(() => {
         async function fetchProducts() {
@@ -35,8 +57,8 @@ export default function products() {
 
         const data = await res.json();
         if (data.message) {
-            const filtredProducts = products.filter(product => product.productCode !== currentModifyProductCode)
-            setProducts(filtredProducts)
+            const filteredProducts = products.filter(product => product.productCode !== currentModifyProductCode);
+            setProducts(filteredProducts);
         }
     }
 
@@ -109,17 +131,15 @@ export default function products() {
                                                 </div>
                                             </div>
                                             <div className="card-footer d-flex justify-content-between gap-2 bg-dark border-0">
-                                                {/* <button className="btn btn-secondary w-50">تعديل</button> */}
-                                                <button className="btn btn-danger w-100" type="button" data-bs-toggle="modal" data-bs-target="#removeProductModal" onClick={() => setCurrentModifyProductCode(product.productCode)}><i className="fa-solid fa-trash" style={{fontSize: "14px", marginLeft: "20px"}}></i> حذف</button>
+                                                <button className="btn btn-danger w-100" type="button" data-bs-toggle="modal" data-bs-target="#removeProductModal" onClick={() => setCurrentModifyProductCode(product.productCode)}>
+                                                    <i className="fa-solid fa-trash" style={{ fontSize: "14px", marginLeft: "20px" }}></i> حذف
+                                                </button>
                                             </div>
                                         </div>
                                     </div>
                                 ))}
-
                             </div>
                         </div>
-
-
                     </div>
                 </div>
 
@@ -128,5 +148,5 @@ export default function products() {
                 <AgreeModals handleRemoveProduct={handleRemoveProduct} />
             </div>
         </>
-    )
+    );
 }

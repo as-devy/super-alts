@@ -33,7 +33,7 @@ body {
   margin: 0 !important;
 }
 
-iframe{
+iframe {
   width: 100% !important;
 }
 
@@ -53,7 +53,7 @@ section {
   min-height: 50vh;
 }
 
-.preloader{
+.preloader {
   position: fixed;
   top: 0;
   left: 0;
@@ -61,14 +61,14 @@ section {
   height: 100%;
 }
 
-.preloader .icon{
+.preloader .icon {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
 }
 
-.preloader .logo{
+.preloader .logo {
   width: 90px;
   height: 90px;
   border-radius: 50%;
@@ -92,6 +92,21 @@ section {
   position: relative;
   z-index: 999;
   padding: 0 3px;
+}
+
+.Toastify__toast-theme--colored.Toastify__toast--success,
+.Toastify__toast-theme--colored.Toastify__toast--error {
+  min-width: 400px;
+  width: fit-content;
+  font-family: "Cairo", sans-serif;
+  gap: .3rem;
+  margin-bottom: 15px !important;
+}
+
+.Toastify__close-button {
+  right: unset !important;
+  top: 2px !important;
+  left: 10px !important;
 }
 
 .ziina-button {

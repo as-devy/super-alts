@@ -5,12 +5,32 @@ import AddLicenseModal from "src/pages/components/dashboard/AddLicenseModal";
 import AgreeModals from "../../components/dashboard/AgreeModals";
 import { ToastContainer } from 'react-toastify';
 import { useLicenses } from "../../../utils/useLicenses";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/router";
 
-export default function licenses() {
-    const [searchQuery, setSearchQuery] = useState('');
-    const [error, setError] = useState("")
-    // Use the shared hook for all license logic
+export default function Licenses() {
+    const [error, setError] = useState("");
+    const { data: session, status } = useSession();
+    const router = useRouter();
+
+    // 🚨 Protect route: redirect if not admin
+    useEffect(() => {
+        if (status === "authenticated" && session?.user?.id !== process.env.NEXT_PUBLIC_ADMIN_ID) {
+            router.replace('/dashboard');
+        }
+    }, [status, session, router]);
+
+    // Show loading state while checking session
+    if (status === "loading") {
+        return <p>Loading...</p>;
+    }
+
+    // Prevent non-admin from seeing flash of content before redirect
+    if (status === "authenticated" && session?.user?.id !== process.env.NEXT_PUBLIC_ADMIN_ID) {
+        return null;
+    }
+
     const {
         licenses,
         setLicenses,
@@ -23,29 +43,10 @@ export default function licenses() {
         handleRegenerateLicense,
         handleMultiToggleLicenses,
         handleMultiResetIp,
-        handleMultiRegenerateLicense
+        handleMultiRegenerateLicense,
+        handleSearch,
+        searchQuery
     } = useLicenses('/api/admin/licenses/licenses');
-
-    const [allLicenses, setAllLicenses] = useState([]);
-    // Sync allLicenses for search
-    useState(() => {
-        setAllLicenses(licenses);
-    }, [licenses]);
-
-    const handleSearch = (e) => {
-        const query = e.target.value.toLowerCase();
-        setSearchQuery(query);
-        if (query.trim() === '') {
-            setLicenses(allLicenses);
-        } else {
-            const filtered = allLicenses.filter(
-                license =>
-                    license.userId.toLowerCase().includes(query) ||
-                    license.licenseKey.toLowerCase().includes(query)
-            );
-            setLicenses(filtered);
-        }
-    };
 
     return (
         <>
@@ -109,31 +110,33 @@ export default function licenses() {
                                         </li>
                                     </ul>
                                 )}
-                                <table className="table table-bordered table-hover">
-                                    <thead className="table-dark">
-                                        <tr>
-                                            <th scope="col">#</th>
-                                            <th scope="col">أيدي العميل</th>
-                                            <th scope="col">المنتج</th>
-                                            <th scope="col">كود المنتج</th>
-                                            <th scope="col">الرخصة</th>
-                                            <th scope="col">الأيبي</th>
-                                            <th scope="col">حالة الرخصة</th>
-                                            <th scope="col">حالة البوت</th>
-                                            <th scope="col" style={{ width: '100px' }}>إجرائات</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <RenderLicenses
-                                            renderForAdmin={true}
-                                            licenses={licenses}
-                                            setCurrentModifyLicenseKey={setCurrentModifyLicenseKey}
-                                            setCurrentModifyLicenses={setCurrentModifyLicenses}
-                                            activateLicense={activateLicense}
-                                            deactivateLicense={deactivateLicense}
-                                        />
-                                    </tbody>
-                                </table>
+                                <div className="responsive-table responsive-table">
+                                    <table className="table table-bordered table-hover">
+                                        <thead className="table-dark">
+                                            <tr>
+                                                <th scope="col">#</th>
+                                                <th scope="col">أيدي العميل</th>
+                                                <th scope="col">المنتج</th>
+                                                <th scope="col">كود المنتج</th>
+                                                <th scope="col">الرخصة</th>
+                                                <th scope="col">الأيبي</th>
+                                                <th scope="col">حالة الرخصة</th>
+                                                <th scope="col">حالة البوت</th>
+                                                <th scope="col" style={{ width: '100px' }}>إجرائات</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <RenderLicenses
+                                                renderForAdmin={true}
+                                                licenses={licenses}
+                                                setCurrentModifyLicenseKey={setCurrentModifyLicenseKey}
+                                                setCurrentModifyLicenses={setCurrentModifyLicenses}
+                                                activateLicense={activateLicense}
+                                                deactivateLicense={deactivateLicense}
+                                            />
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </div>

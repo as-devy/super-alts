@@ -55,25 +55,25 @@ const Header = ({ activeLink }) => {
         <header dir="ltr">
             <div className='container d-flex justify-content-center align-items-center'>
                 <div className="main_nav">
-                    <div className="logo">
+                    <Link href="/" className="logo">
                         <img src="/assets/logo.png" alt="Logo" />
-                    </div>
+                    </Link>
                     <nav>
-                        <ul className="nav_links">
+                        <ul className="nav_links" dir="rtl">
                             <li className={activeSection === "home" ? "active" : ""}>
-                                <Link href="/">Home</Link>
+                                <Link href="/">الرئيسية</Link>
                             </li>
                             <li className={activeSection === "achives" ? "active" : ""}>
-                                <a href="#achives">Achievements</a>
+                                <Link href="/#achives">الأنجازات</Link>
                             </li>
                             <li className={activeSection === "about-us" ? "active" : ""}>
-                                <a href="#about-us">About</a>
+                                <Link href="/#about-us">من نحن</Link>
                             </li>
                             <li className={activeSection === "products" ? "active" : ""}>
-                                <Link href="/products">Products</Link>
+                                <Link href="/products">المنتجات</Link>
                             </li>
                             <li className={activeSection === "testimonials" ? "active" : ""}>
-                                <a href="#testimonials">Testimonials</a>
+                                <Link href="/#testimonials">تقيمات العملاء</Link>
                             </li>
                         </ul>
                     </nav>
@@ -85,7 +85,7 @@ const Header = ({ activeLink }) => {
                         ) : (
                             <div className="d-flex align-items-center gap-3">
                                 <Link href="/dashboard" className="dsh-link">
-                                    Dashboard
+                                    {session.user.id == process.env.NEXT_PUBLIC_ADMIN_ID ? "Admin Dashboard" : "Dashboard"}
                                 </Link>
                                 <button
                                     type="button"
@@ -112,19 +112,19 @@ const Header = ({ activeLink }) => {
                 </div>
                 <ul>
                     <li className={activeSection === "home" ? "active" : ""}>
-                        <Link href="/">Home</Link>
+                        <Link href="/">الرئيسية</Link>
                     </li>
                     <li className={activeSection === "achives" ? "active" : ""}>
-                        <a href="#achives">Achievements</a>
+                        <Link href="/#achives">الأنجازات</Link>
                     </li>
                     <li className={activeSection === "about-us" ? "active" : ""}>
-                        <a href="#about-us">About</a>
+                        <Link href="/#about-us">من نحن</Link>
                     </li>
                     <li className={activeSection === "products" ? "active" : ""}>
-                        <Link href="/products">Products</Link>
+                        <Link href="/products">المنتجات</Link>
                     </li>
                     <li className={activeSection === "testimonials" ? "active" : ""}>
-                        <a href="#testimonials">Testimonials</a>
+                        <Link href="/#testimonials">تقيمات العملاء</Link>
                     </li>
                 </ul>
             </div>

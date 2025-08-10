@@ -5,10 +5,15 @@ export default function Cart({ cart, setCart }) {
         setCart(prev => prev.filter(item => item.productCode !== productCode));
     }
 
-    const getCartTotalPrice = () =>
-        cart.reduce((total, product) =>
-            total + Number(product.productSale || product.productPrice), 0
+    const getCartTotalPrice = () => {
+        const baseTotal = cart.reduce(
+            (total, product) =>
+                total + Number(product.productSale || product.productPrice),
+            0
         );
+
+        return Number(((baseTotal + 1) / 0.971).toFixed(2));
+    };
 
     const handleZiinaPay = async () => {
         const res = await fetch('/api/payment/ziina/create-intent', {

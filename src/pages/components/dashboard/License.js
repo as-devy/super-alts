@@ -1,10 +1,8 @@
-import { useEffect, useState, useRef } from 'react';
-import { useLicenses } from "../../../utils/useLicenses";
+import { useRef } from 'react';
 
-function License({ license, i, renderForAdmin, productStatus, productLicenseStatus, tooltipRefs, }) {
+function License({ license, i, renderForAdmin, setCurrentModifyLicenses, setCurrentModifyLicenseKey, tooltipRefs, activateLicense, deactivateLicense }) {
     const copyBtnRef = useRef(null);
-    const [productBotStatusState, setproductBotStatusState] = useState(license.status == '🟢' ? "active" : "deactive")
-    
+
     const copyToClipboard = async (text) => {
         try {
             await navigator.clipboard.writeText(text);
@@ -22,27 +20,6 @@ function License({ license, i, renderForAdmin, productStatus, productLicenseStat
         }
     };
 
-    const {
-            activateLicense,
-            deactivateLicense,
-            setCurrentModifyLicenseKey,
-            setCurrentModifyLicenses,
-        } = useLicenses('/api/licenses/licenses');
-
-    const handleStartBot = () => {
-        // setproductBotStatusState("active")
-    }
-
-    const handleStopBot = async (licenseKey) => {
-        const res = await fetch('/api/stopBot', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ licenseKey: licenseKey })
-        });
-
-        const data = await res.json();
-    }
-
     return (
         <tr>
             <td className="text-center">
@@ -56,7 +33,7 @@ function License({ license, i, renderForAdmin, productStatus, productLicenseStat
 
                         setCurrentModifyLicenses(prev => {
                             if (isChecked) {
-                                return [...prev, {licenseKey, valid}];
+                                return [...prev, { licenseKey, valid }];
                             } else {
                                 return prev.filter(license => license.licenseKey !== licenseKey);
                             }
@@ -84,7 +61,7 @@ function License({ license, i, renderForAdmin, productStatus, productLicenseStat
             </td>
             <td>{license.ip}</td>
             <td>{license.valid ? "مُفعلة" : "مُعطلة"}</td>
-            <td>{productBotStatusState == "active" ? "مُغعل🟢" : "مُعطل🔴"}</td>
+            <td>{license.status}</td>
             <td className="ps-3">
                 {/* <button className="btn btn-dark" aria-expanded="false">
                     <i className="fa-solid fa-download"></i>
@@ -103,19 +80,11 @@ function License({ license, i, renderForAdmin, productStatus, productLicenseStat
                                 </a>
                             </li>
                         }
+
                         {license.valid ? (
                             <li><a className="dropdown-item" href="#" onClick={() => deactivateLicense(license.licenseKey)}>تعطيل الرخصة</a></li>
                         ) : (
                             <li><a className="dropdown-item" href="#" onClick={() => activateLicense(license.licenseKey)}>تفعيل الرخصة</a></li>
-                        )
-                        }
-
-                        {!renderForAdmin && (
-                            productBotStatusState == "active" ? (
-                                <li><a className="dropdown-item" href="#" onClick={() => handleStopBot(license.licenseKey)}>إيقاف البوت</a></li>
-                            ) : (
-                                <li><a className="dropdown-item" href="#" onClick={() => handleStartBot(license.licenseKey)}>تشغيل البوت</a></li>
-                            )
                         )
                         }
 
