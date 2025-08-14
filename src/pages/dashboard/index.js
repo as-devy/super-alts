@@ -17,7 +17,7 @@ function Dashboard() {
     useEffect(() => {
         if (status === "unauthenticated") {
             router.replace('/');
-        } else if (status === "authenticated" && session?.user?.id === process.env.NEXT_PUBLIC_ADMIN_ID) {
+        } else if (status === "authenticated" && process.env.NEXT_PUBLIC_ADMIN_IDS?.split(',').includes(session.user.id)) {
             router.replace('/dashboard/admin');
         }
     }, [status, session, router]);
@@ -32,7 +32,7 @@ function Dashboard() {
     }
 
     // Prevent rendering if admin user is being redirected
-    if (status === "authenticated" && session?.user?.id === process.env.NEXT_PUBLIC_ADMIN_ID) {
+    if (status === "authenticated" && process.env.NEXT_PUBLIC_ADMIN_IDS?.split(',').includes(session?.user?.id)) {
         return null;
     }
 

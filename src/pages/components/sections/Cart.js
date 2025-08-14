@@ -6,6 +6,8 @@ export default function Cart({ cart, setCart }) {
     }
 
     const getCartTotalPrice = () => {
+        if (cart.length === 0) return 0;
+
         const baseTotal = cart.reduce(
             (total, product) =>
                 total + Number(product.productSale || product.productPrice),
@@ -14,6 +16,7 @@ export default function Cart({ cart, setCart }) {
 
         return Number(((baseTotal + 1) / 0.971).toFixed(2));
     };
+
 
     const handleZiinaPay = async () => {
         const res = await fetch('/api/payment/ziina/create-intent', {

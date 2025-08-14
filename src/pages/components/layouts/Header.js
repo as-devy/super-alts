@@ -85,7 +85,7 @@ const Header = ({ activeLink }) => {
                         ) : (
                             <div className="d-flex align-items-center gap-3">
                                 <Link href="/dashboard" className="dsh-link">
-                                    {session.user.id == process.env.NEXT_PUBLIC_ADMIN_ID ? "Admin Dashboard" : "Dashboard"}
+                                    {process.env.NEXT_PUBLIC_ADMIN_IDS?.split(',').includes(session.user.id) ? "Admin Dashboard" : "Dashboard"}
                                 </Link>
                                 <button
                                     type="button"

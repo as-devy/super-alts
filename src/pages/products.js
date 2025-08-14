@@ -148,17 +148,17 @@ export default function Products({ cart, setCart }) {
     const renderAddToCartButton = (product) => {
         // If user is authenticated, check their licenses and cart
         if (session) {
-            const isOwned = userLicenses.some(license => license.productCode === product.productCode);
+            // const isOwned = userLicenses.some(license => license.productCode === product.productCode);
             const inCart = cart.some(item => item.productCode === product.productCode);
 
-            if (isOwned) {
-                return (
-                    <button className="btn btn-success btn-sm d-flex align-items-center gap-1" style={{ opacity: "0.8" }} disabled>
-                        <i className="fa-solid fa-check"></i>
-                        تم الشراء
-                    </button>
-                );
-            }
+            // if (isOwned) {
+            //     return (
+            //         <button className="btn btn-success btn-sm d-flex align-items-center gap-1" style={{ opacity: "0.8" }} disabled>
+            //             <i className="fa-solid fa-check"></i>
+            //             تم الشراء
+            //         </button>
+            //     );
+            // }
 
             if (inCart) {
                 return (

@@ -16,7 +16,7 @@ export default function Licenses() {
 
     // 🚨 Protect route: redirect if not admin
     useEffect(() => {
-        if (status === "authenticated" && session?.user?.id !== process.env.NEXT_PUBLIC_ADMIN_ID) {
+        if (status === "authenticated" && !process.env.NEXT_PUBLIC_ADMIN_IDS?.split(',').includes(session?.user?.id)) {
             router.replace('/dashboard');
         }
     }, [status, session, router]);
@@ -27,7 +27,7 @@ export default function Licenses() {
     }
 
     // Prevent non-admin from seeing flash of content before redirect
-    if (status === "authenticated" && session?.user?.id !== process.env.NEXT_PUBLIC_ADMIN_ID) {
+    if (status === "authenticated" && !process.env.NEXT_PUBLIC_ADMIN_IDS?.split(',').includes(session?.user?.id)) {
         return null;
     }
 
