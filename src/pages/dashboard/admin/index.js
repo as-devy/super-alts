@@ -14,7 +14,7 @@ export async function getServerSideProps(context) {
   }
 
   // If not an admin, redirect to user dashboard
-  if (process.env.NEXT_PUBLIC_ADMIN_IDS?.split(',').includes(session.user.id)) {
+  if (process.env.NEXT_PUBLIC_ADMIN_ID?.split(',').includes(session?.user?.id)) {
     return {
       redirect: {
         destination: '/dashboard',
