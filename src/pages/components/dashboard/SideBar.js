@@ -13,7 +13,7 @@ export default function SideBar({ renderForAdmin, products, licenses, coupons })
         <aside className='col-3 col-md-4 col-xxl-3'>
             <div className='tp'>
                 <Link href="/"><img src="/assets/logo.png" alt="Logo" /></Link>
-                <a href='#' className="logout" onClick={() => signOut()}><i className="fa-solid fa-right-from-bracket"></i> <span>تسجيل خروج</span> </a>
+                <a href='#' className="logout" onClick={() => signOut({ callbackUrl: "/" })}><i className="fa-solid fa-right-from-bracket"></i> <span>تسجيل خروج</span> </a>
             </div>
             <div className='user text-center'>
                 <div className='user_img'>
