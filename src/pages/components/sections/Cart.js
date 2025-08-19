@@ -1,21 +1,90 @@
 import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
+import { useEffect, useState } from 'react';
+import { toast, ToastContainer } from 'react-toastify';
 
 export default function Cart({ cart, setCart }) {
+    const [totalPrice, setTotalPrice] = useState(0)
+    const [coupon, setCoupon] = useState(null);
+    const [couponCode, setCouponCode] = useState(null);
+    const [couponApplied, setCouponApplied] = useState(false)
+    const [error, setError] = useState(null)
+
     const handleRemoveFormCart = (productCode) => {
         setCart(prev => prev.filter(item => item.productCode !== productCode));
-    }
-
-    const getCartTotalPrice = () => {
-        if (cart.length === 0) return 0;
-
-        const baseTotal = cart.reduce(
-            (total, product) =>
-                total + Number(product.productSale || product.productPrice),
-            0
-        );
-
-        return Number(((baseTotal + 1) / 0.971).toFixed(2));
     };
+
+    useEffect(() => {
+        if (cart.length === 0) {
+            setTotalPrice(0);
+            return;
+        }
+
+        // ✅ calculate subtotal correctly
+        const baseTotal = cart.reduce((sum, product) => {
+            const price =
+                product.productSale && Number(product.productSale) < Number(product.productPrice)
+                    ? Number(product.productSale)
+                    : Number(product.productPrice);
+
+            return sum + price;
+        }, 0);
+
+        // ✅ apply your formula
+        const total = (baseTotal + 1) / 0.971;
+
+        // ✅ update state
+        setTotalPrice(Number(total.toFixed(2)));
+
+    }, [cart]);
+
+    const handleSubmitCouponCode = (e) => {
+        e.preventDefault()
+        const fetchCoupon = async () => {
+            try {
+                const res = await fetch(`/api/getCoupon/${couponCode}`);
+                if (!res.ok) {
+                    throw new Error(`Error: ${res.status}`);
+                }
+
+                const data = await res.json();
+                setCoupon(data);
+                console.log("Fetched coupon:", data);
+
+                // check directly with data
+                if (data.minPrice && totalPrice < data.minPrice) {
+                    setError(`يتطلب أستخدام القسيمة قيمة مشتريات بحد ادنى ${data.minPrice}$`);
+                    return;
+                } else {
+                    setError(null);
+
+                    let finalPrice = totalPrice;
+
+                    if (data.discountTypeValue.includes("%")) {
+                        // percentage discount
+                        const percent = parseFloat(data.discountTypeValue.replace("%", ""));
+                        finalPrice = totalPrice - (totalPrice * percent) / 100;
+                    } else if (data.discountTypeValue.includes("$")) {
+                        // fixed discount
+                        const amount = parseFloat(data.discountTypeValue.replace("$", ""));
+                        finalPrice = totalPrice - amount;
+                    }
+
+                    setTotalPrice(finalPrice.toFixed(2));
+                    setCouponApplied(true)
+                }
+            } catch (err) {
+                console.log("Coupon error:", err.message);
+                setError("رمز قسيمة غير صالح أو منتهي الصلاحية.");
+                setCoupon(null);
+            }
+        };
+
+
+        if (couponCode !== "") {
+            fetchCoupon();
+
+        }
+    }
 
 
     const handleZiinaPay = async () => {
@@ -23,7 +92,7 @@ export default function Cart({ cart, setCart }) {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                amount: getCartTotalPrice(),
+                amount: totalPrice,
                 description: 'Order payment'
             })
         });
@@ -70,8 +139,21 @@ export default function Cart({ cart, setCart }) {
                     }
                 </div>
                 <div className="total">
-                    <h6 className='d-flex align-items-center gap-1'>المجموع: <span className="price" style={{ fontSize: "20px" }}>${getCartTotalPrice()}</span></h6>
+                    <h6 className='d-flex align-items-center gap-1'>المجموع: <span className="price" style={{ fontSize: "20px" }}>${totalPrice}</span></h6>
                     <div className={`payment_btns ${cart.length < 1 && 'disbaled'}`}>
+                        <form className={`d-flex justify-content-between align-items-center mt-3 mb-2 ${couponApplied && 'disbaled'}`} onSubmit={handleSubmitCouponCode}>
+                            {/* <label style={{ fontSize: "18px" }}>كوبون: </label> */}
+                            <input
+                                type='text'
+                                className='text-white'
+                                placeholder='أدخل كوبون'
+                                value={couponCode}
+                                onChange={(e) => setCouponCode(e.target.value)}
+                                style={{ outline: 'none', border: "1px solid rgb(127 127 127)", background: "rgb(55 55 55)", width: "80%", padding: "4px 8px", borderRadius: ".3rem" }} />
+
+                            <button className='btn btn-primary' disabled={couponApplied}>تطبيق</button>
+                        </form>
+                        {error && <span style={{ color: "red" }}>{error}</span>}
                         <button className="ziina-button btn btn-primary w-100 mt-3 mb-3 p-2 border-0 d-flex align-items-center gap-1 justify-content-center" onClick={handleZiinaPay}>
                             <svg fill="none" height="20" viewBox="0 0 64 64" width="20" xmlns="http://www.w3.org/2000/svg" className="me-2 h-3 w-3"><path d="M31.9664 5.46275L18.7086 0.00589076L13.2568 13.276L26.5146 18.7328L31.9664 5.46275Z" fill="currentColor"></path><path d="M50.7208 13.2769L45.2203 26.5683L58.359 32.0027L64 18.7825L50.7208 13.2769Z" fill="currentColor"></path><path d="M13.2568 13.276L0 18.7331L5.4518 32.0031L18.7096 26.5463L13.2568 13.276Z" fill="currentColor"></path><path d="M45.2911 0L32.0119 5.50562L37.5124 18.7971L50.7916 13.2915L45.2911 0Z" fill="currentColor"></path><path d="M58.359 32.0027L45.2252 37.4595L50.677 50.7296L63.9347 45.2727L58.359 32.0027Z" fill="currentColor"></path><path d="M31.9683 58.419L45.2261 63.9999L50.6779 50.7298L37.4202 45.273L31.9683 58.419Z" fill="currentColor"></path><path d="M13.2578 50.7296L18.7096 37.4595L5.4518 32.0031L0 45.2727L13.2578 50.7296Z" fill="currentColor"></path><path d="M26.5481 45.1484L13.2689 50.654L18.7694 63.9455L32.0486 58.4399L26.5481 45.1484Z" fill="currentColor"></path></svg>
                             الدفع بواسطة زينة
@@ -83,7 +165,7 @@ export default function Cart({ cart, setCart }) {
                                 createOrder={(data, actions) => {
                                     return actions.order.create({
                                         purchase_units: [{
-                                            amount: { value: getCartTotalPrice().toString() }
+                                            amount: { value: totalPrice.toString() }
                                         }]
                                     });
                                 }}

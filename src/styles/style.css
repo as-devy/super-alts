@@ -119,9 +119,16 @@ section {
   background-color: #a347e6;
 }
 
-.payment_btns.disbaled {
+.payment_btns.disbaled,
+.payment_btns form.disbaled {
   opacity: .5;
   position: relative;
+  cursor: no-drop;
+}
+
+.payment_btns form.disbaled input,
+.payment_btns form.disbaled button{
+  cursor: no-drop;
 }
 
 .payment_btns.disbaled::after {
