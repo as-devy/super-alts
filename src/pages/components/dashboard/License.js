@@ -63,10 +63,8 @@ function License({ license, i, renderForAdmin, setCurrentModifyLicenses, setCurr
             <td>{license.valid ? "مُفعلة" : "مُعطلة"}</td>
             <td>{license.status}</td>
             <td className="ps-3">
-                {/* <button className="btn btn-dark" aria-expanded="false">
-                    <i className="fa-solid fa-download"></i>
-                </button> */}
-                <div className="dropdown text-center">
+
+                <div className="dropdown d-flex gap-2">
                     <button className="btn btn-dark" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <i className="fa-solid fa-ellipsis"></i>
                     </button>
@@ -103,6 +101,10 @@ function License({ license, i, renderForAdmin, setCurrentModifyLicenses, setCurr
                             </a>
                         </li>
                     </ul>
+
+                    <button className="btn btn-dark" aria-expanded="false">
+                        <i className="fa-solid fa-download"></i>
+                    </button>
                 </div>
             </td>
         </tr>

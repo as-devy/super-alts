@@ -2,7 +2,6 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
 
   const { amount, description } = req.body;
-  const amountInCents = Math.round(Number(amount) * 100); // Convert to cents
   const accessToken = process.env.ZIINA_ACCESS_TOKEN;
   const currency_code = process.env.ZIINA_PREFERRED_CURRENCY || 'USD';
   
@@ -15,7 +14,7 @@ export default async function handler(req, res) {
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      amount: amountInCents,
+      amount: amount,
       currency_code,
       description,
       ...(redirectUrl && { redirect_url: redirectUrl })

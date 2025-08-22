@@ -256,6 +256,11 @@
   padding: 3px 12px !important;
 }
 
+.dropdown .btn {
+  padding: .375rem .75rem !important
+}
+
+
 .dashboard .btn.btn-dark {
   background-color: #424649;
 }
@@ -309,7 +314,7 @@
   position: relative;
 }
 
-.dashboard .products .product-card .product_best {
+.product-card .product_best {
   position: absolute;
   top: 5px;
   right: 7px;
@@ -556,9 +561,10 @@
 }
 
 @media (max-width: 576px) {
-  .dashboard .conatiner{
+  .dashboard .conatiner {
     padding: 10px !important;
   }
+
   .dashboard .products {
     gap: 0.5rem;
   }

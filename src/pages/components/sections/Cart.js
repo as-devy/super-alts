@@ -88,27 +88,53 @@ export default function Cart({ cart, setCart }) {
 
 
     const handleZiinaPay = async () => {
-        const res = await fetch('/api/payment/ziina/create-intent', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                amount: totalPrice,
-                description: 'Order payment'
-            })
-        });
-        const data = await res.json();
-        if (data.redirect_url) {
-            const width = 600;
-            const height = 800;
-            window.open(
-                data.redirect_url,
-                '_blank',
-                `width=${width},height=${height},left=${(window.innerWidth - width) / 2 + window.screenX},top=${(window.innerHeight - height) / 2 + window.screenY}`
-            );
-        } else {
-            alert('Failed to initiate Ziina payment');
+        try {
+            // 1. Fetch USD → AED exchange rate
+            const rateRes = await fetch("https://open.er-api.com/v6/latest/USD");
+            const rateData = await rateRes.json();
+            const usdToAed = rateData?.rates?.AED;
+
+            if (!usdToAed) {
+                alert("Failed to fetch exchange rate");
+                return;
+            }
+
+            // 2. Convert your total price from USD → AED
+            const usdTotal = totalPrice;               // e.g. 50 (USD)
+            const aedTotal = usdTotal * usdToAed;      // converted to AED
+            const amountInFils = Math.round(aedTotal * 100); // Ziina expects fils
+
+            // 3. Create the payment intent in AED
+            const res = await fetch('/api/payment/ziina/create-intent', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    amount: amountInFils,
+                    currency_code: 'AED',
+                    description: 'Order payment'
+                })
+            });
+
+            const data = await res.json();
+
+            // 4. Redirect user if success
+            if (data.redirect_url) {
+                const width = 600;
+                const height = 800;
+                window.open(
+                    data.redirect_url,
+                    '_blank',
+                    `width=${width},height=${height},left=${(window.innerWidth - width) / 2 + window.screenX},top=${(window.innerHeight - height) / 2 + window.screenY}`
+                );
+            } else {
+                alert('Failed to initiate Ziina payment');
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Error while processing payment");
         }
     };
+
 
     return (
         <div className="cart-slider offcanvas offcanvas-end text-bg-dark" tabIndex="-1" id="cartDrawer">

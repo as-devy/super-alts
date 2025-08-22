@@ -196,6 +196,7 @@ export default function Products({ cart, setCart }) {
                             className="product-card col-12 col-sm-6 col-md-4 col-lg-3 col-xxl-2"
                             key={i}
                         >
+                            {product.productBest ? <span className="product_best">الأفضل مبيعا</span> : ""}
                             <div className="img">
                                 {product.productImage && (
                                     <img
@@ -233,7 +234,7 @@ export default function Products({ cart, setCart }) {
                     <div className="close" onClick={() => viewProductRef.current.classList.remove("active")}> <i className="fa-solid fa-x"></i></div>
                     <div className="img">
                         {selectedProduct.productImage && (
-                            <div className="img"><img src={selectedProduct.productImage} alt={selectedProduct.productName} /></div>
+                            <img src={selectedProduct.productImage} alt={selectedProduct.productName} />
                         )}
                     </div>
                     <div className="content">
