@@ -3,7 +3,7 @@ import SideBar from "../../components/dashboard/SideBar";
 import RenderLicenses from '../../components/dashboard/RenderLicenses'
 import AddLicenseModal from "src/pages/components/dashboard/AddLicenseModal";
 import AgreeModals from "../../components/dashboard/AgreeModals";
-import { ToastContainer } from 'react-toastify';
+import { ToastContainer, toast } from 'react-toastify';
 import { useLicenses } from "../../../utils/useLicenses";
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
@@ -31,11 +31,13 @@ export default function Licenses() {
         return null;
     }
 
+
     const {
         licenses,
         setLicenses,
-        setCurrentModifyLicenseKey,
         currentModifyLicenses,
+        currentModifyLicenseKey,
+        setCurrentModifyLicenseKey,
         activateLicense,
         deactivateLicense,
         setCurrentModifyLicenses,
@@ -47,6 +49,33 @@ export default function Licenses() {
         handleSearch,
         searchQuery
     } = useLicenses('/api/admin/licenses/licenses');
+
+    const handleRemoveLicense = async () => {
+        try {
+            const res = await fetch("/api/admin/licenses/removeLicense", {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    licenseKey: currentModifyLicenseKey,
+                }),
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                toast.success("تم حذف الرخصة");
+                setLicenses((prevLicenses) =>
+                    prevLicenses.filter((license) => license.licenseKey !== currentModifyLicenseKey)
+                );
+            } else {
+                toast.error("فشل في إزالة الرخصة");
+            }
+        } catch (error) {
+            toast.error("فشل في إزالة الرخصة");
+        }
+    };
 
     return (
         <>
@@ -141,10 +170,12 @@ export default function Licenses() {
                         </div>
                     </div>
                 </div>
-                <AddLicenseModal setLicenses={setLicenses} setError={setError} />
+                <AddLicenseModal setLicenses={setLicenses} toast={toast} setError={setError} />
                 <AgreeModals
                     handleResetIp={handleResetIp}
                     handleRegenerateLicense={handleRegenerateLicense}
+                    currentModifyLicenseKey={currentModifyLicenseKey}
+                    handleRemoveLicense={handleRemoveLicense}
                 />
                 <ToastContainer
                     position="bottom-right"

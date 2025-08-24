@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-export default function AddLicenseModal({ setLicenses, setError }) {
+export default function AddLicenseModal({ setLicenses, setError, toast }) {
     const [licenseKey, setLicenseKey] = useState("")
     const [selectedProduct, setSelectedProduct] = useState("المنتج")
     const [products, setProducts] = useState([]);
@@ -61,6 +61,7 @@ export default function AddLicenseModal({ setLicenses, setError }) {
         setLicenseKey("")
         setProductCode("")
         setUserId("")
+        toast.success("تمت إضافة الرخصة")
     }
 
     return (

@@ -3,7 +3,8 @@ import { useEffect, useState } from 'react';
 import { toast, ToastContainer } from 'react-toastify';
 
 export default function Cart({ cart, setCart }) {
-    const [totalPrice, setTotalPrice] = useState(0)
+    const [totalPrice, setTotalPrice] = useState(0);
+    const [feePrice, setFeePrice] = useState(0);
     const [coupon, setCoupon] = useState(null);
     const [couponCode, setCouponCode] = useState(null);
     const [couponApplied, setCouponApplied] = useState(false)
@@ -35,6 +36,10 @@ export default function Cart({ cart, setCart }) {
         // ✅ update state
         setTotalPrice(Number(total.toFixed(2)));
 
+        // ✅ calculate fee
+        const fee = total - baseTotal;
+
+        setFeePrice(Number(fee.toFixed(2)));
     }, [cart]);
 
     const handleSubmitCouponCode = (e) => {
@@ -150,7 +155,7 @@ export default function Cart({ cart, setCart }) {
                                 <div className="d-flex gap-3">
                                     {product.productImage ? (
                                         <div className="product-img">
-                                            <img src="" alt="product-img" />
+                                            <img src={product.productImage} alt="product-img" />
                                         </div>
                                     ) : <div className="icon"><i className="fa-solid fa-box-open fa-2x text-white-50"></i></div>
                                     }
@@ -165,6 +170,7 @@ export default function Cart({ cart, setCart }) {
                     }
                 </div>
                 <div className="total">
+                    <h6 className='d-flex align-items-center gap-1 mb-2'>مجموع الضرايب: <span className="price" style={{ fontSize: "20px" }}>${feePrice}</span></h6>
                     <h6 className='d-flex align-items-center gap-1'>المجموع: <span className="price" style={{ fontSize: "20px" }}>${totalPrice}</span></h6>
                     <div className={`payment_btns ${cart.length < 1 && 'disbaled'}`}>
                         <form className={`d-flex justify-content-between align-items-center mt-3 mb-2 ${couponApplied && 'disbaled'}`} onSubmit={handleSubmitCouponCode}>
