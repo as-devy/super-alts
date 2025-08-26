@@ -1,3 +1,4 @@
+import { getSession } from "next-auth/react";
 import Head from "next/head";
 import SideBar from "../../components/dashboard/SideBar";
 import { useState, useEffect } from "react";
@@ -6,29 +7,42 @@ import AgreeModals from "../../components/dashboard/AgreeModals";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 
+export async function getServerSideProps(context) {
+  const session = await getSession(context);
+
+  // 🚨 Redirect if user is not logged in
+  if (!session) {
+    return {
+      redirect: {
+        destination: "/", // send unauthenticated users home
+        permanent: false,
+      },
+    };
+  }
+
+  // 🚨 Redirect if user is NOT an admin
+  const adminIds = process.env.NEXT_PUBLIC_ADMIN_IDS
+    ? process.env.NEXT_PUBLIC_ADMIN_IDS.split(",")
+    : [];
+
+  if (!adminIds.includes(session.user.id)) {
+    return {
+      redirect: {
+        destination: "/dashboard", // send normal users to dashboard
+        permanent: false,
+      },
+    };
+  }
+
+  // ✅ User is admin → allow access
+  return {
+    props: { session },
+  };
+}
+
 export default function Products() {
     const [products, setProducts] = useState([]);
     const [currentModifyProductCode, setCurrentModifyProductCode] = useState([]);
-
-    const { data: session, status } = useSession();
-    const router = useRouter();
-
-    // 🔒 Protect admin route
-    useEffect(() => {
-        if (status === "authenticated" && !process.env.NEXT_PUBLIC_ADMIN_IDS?.split(',').includes(session?.user?.id)) {
-            router.replace('/dashboard');
-        }
-    }, [status, session, router]);
-
-    // Show loading until session is resolved
-    if (status === "loading") {
-        return <p>Loading...</p>;
-    }
-
-    // Block access until redirect completes
-    if (status === "authenticated" && !process.env.NEXT_PUBLIC_ADMIN_IDS?.split(',').includes(session?.user?.id)) {
-        return null;
-    }
 
     useEffect(() => {
         async function fetchProducts() {

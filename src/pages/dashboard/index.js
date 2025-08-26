@@ -1,3 +1,4 @@
+import { getSession } from "next-auth/react";
 import { useSession } from "next-auth/react";
 import Head from "next/head";
 import { ToastContainer } from 'react-toastify';
@@ -9,33 +10,40 @@ import { useLicenses } from "../../utils/useLicenses";
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
 
+export async function getServerSideProps(context) {
+    const session = await getSession(context);
+
+    // 1. Redirect unauthenticated users → home
+    if (!session) {
+        return {
+            redirect: {
+                destination: "/",
+                permanent: false,
+            },
+        };
+    }
+
+    // 2. Check if user is admin
+    const adminIds = process.env.NEXT_PUBLIC_ADMIN_IDS
+        ? process.env.NEXT_PUBLIC_ADMIN_IDS.split(",")
+        : [];
+
+    if (adminIds.includes(session.user.id)) {
+        return {
+            redirect: {
+                destination: "/dashboard/admin",
+                permanent: false,
+            },
+        };
+    }
+
+    // 3. Pass session as prop for normal users
+    return {
+        props: { session },
+    };
+}
+
 function Dashboard() {
-    const { data: session, status } = useSession();
-    const router = useRouter();
-
-    // Redirect unauthenticated users to home and admin users to admin dashboard
-    useEffect(() => {
-        if (status === "unauthenticated") {
-            router.replace('/');
-        } else if (status === "authenticated" && process.env.NEXT_PUBLIC_ADMIN_IDS?.split(',').includes(session?.user?.id)) {
-            router.replace('/dashboard/admin');
-        }
-    }, [status, session, router]);
-
-    if (status === "loading") {
-        return <p>Loading...</p>;
-    }
-
-    // Redirect unauthenticated users to home
-    if (status === "unauthenticated") {
-        return null; // Don't render anything while redirecting
-    }
-
-    // Prevent rendering if admin user is being redirected
-    if (status === "authenticated" && process.env.NEXT_PUBLIC_ADMIN_IDS?.split(',').includes(session?.user?.id)) {
-        return null;
-    }
-
     // Use the shared hook for all license logic
     const {
         licenses,
@@ -53,7 +61,7 @@ function Dashboard() {
         handleSearch,
         searchQuery
     } = useLicenses('/api/licenses/licenses');
-    
+
     return (
         <>
             <Head>

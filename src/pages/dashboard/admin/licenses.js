@@ -1,3 +1,4 @@
+import { getSession } from "next-auth/react";
 import Head from "next/head";
 import SideBar from "../../components/dashboard/SideBar";
 import RenderLicenses from '../../components/dashboard/RenderLicenses'
@@ -9,28 +10,41 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 
+export async function getServerSideProps(context) {
+  const session = await getSession(context);
+
+  // 🚨 Redirect if user is not logged in
+  if (!session) {
+    return {
+      redirect: {
+        destination: "/", // send unauthenticated users home
+        permanent: false,
+      },
+    };
+  }
+
+  // 🚨 Redirect if user is NOT an admin
+  const adminIds = process.env.NEXT_PUBLIC_ADMIN_IDS
+    ? process.env.NEXT_PUBLIC_ADMIN_IDS.split(",")
+    : [];
+
+  if (!adminIds.includes(session.user.id)) {
+    return {
+      redirect: {
+        destination: "/dashboard", // send normal users to dashboard
+        permanent: false,
+      },
+    };
+  }
+
+  // ✅ User is admin → allow access
+  return {
+    props: { session },
+  };
+}
+
 export default function Licenses() {
     const [error, setError] = useState("");
-    const { data: session, status } = useSession();
-    const router = useRouter();
-
-    // 🚨 Protect route: redirect if not admin
-    useEffect(() => {
-        if (status === "authenticated" && !process.env.NEXT_PUBLIC_ADMIN_IDS?.split(',').includes(session?.user?.id)) {
-            router.replace('/dashboard');
-        }
-    }, [status, session, router]);
-
-    // Show loading state while checking session
-    if (status === "loading") {
-        return <p>Loading...</p>;
-    }
-
-    // Prevent non-admin from seeing flash of content before redirect
-    if (status === "authenticated" && !process.env.NEXT_PUBLIC_ADMIN_IDS?.split(',').includes(session?.user?.id)) {
-        return null;
-    }
-
 
     const {
         licenses,
