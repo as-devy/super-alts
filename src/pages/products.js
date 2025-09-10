@@ -7,8 +7,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import Header from "./components/layouts/Header";
 import Cart from "./components/sections/Cart";
 
-export default function Products({ cart, setCart }) {
-    const { data: session } = useSession();
+export default function Products({ cart, setCart, session }) {
     const [products, setProducts] = useState([]);
     const [userLicenses, setUserLicensess] = useState([]);
     const [selectedProduct, setSelectedProduct] = useState({});
@@ -188,7 +187,7 @@ export default function Products({ cart, setCart }) {
                 <link rel="icon" href="/favicon.ico" />
             </Head>
             <Header activeLink={"products"} />
-            <Cart cart={cart} setCart={setCart} />
+            <Cart cart={cart} setCart={setCart} session={session} />
             <div className="container-fluid my-4" style={{ margin: "0 auto !important" }}>
                 <div className="row gap-4 justify-content-center">
                     {products.map((product, i) => (

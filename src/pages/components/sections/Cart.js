@@ -2,7 +2,7 @@ import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
 import { useEffect, useState } from 'react';
 import { toast, ToastContainer } from 'react-toastify';
 
-export default function Cart({ cart, setCart }) {
+export default function Cart({ cart, setCart, session }) {
     const [totalPrice, setTotalPrice] = useState(0);
     const [feePrice, setFeePrice] = useState(0);
     const [coupon, setCoupon] = useState(null);
@@ -20,7 +20,6 @@ export default function Cart({ cart, setCart }) {
             return;
         }
 
-        // ✅ calculate subtotal correctly
         const baseTotal = cart.reduce((sum, product) => {
             const price =
                 product.productSale && Number(product.productSale) < Number(product.productPrice)
@@ -30,13 +29,10 @@ export default function Cart({ cart, setCart }) {
             return sum + price;
         }, 0);
 
-        // ✅ apply your formula
         const total = (baseTotal + 1) / 0.971;
 
-        // ✅ update state
         setTotalPrice(Number(total.toFixed(2)));
 
-        // ✅ calculate fee
         const fee = total - baseTotal;
 
         setFeePrice(Number(fee.toFixed(2)));
@@ -91,6 +87,96 @@ export default function Cart({ cart, setCart }) {
         }
     }
 
+    // Common functions for post-payment handling
+    const showPaymentModal = (message) => {
+        const modal = new bootstrap.Modal(document.getElementById('paymentStatusModal'));
+        const messageEl = document.getElementById('paymentMessage');
+        modal.show();
+        messageEl.textContent = message;
+    }
+
+    const generateLicenseKey = () => {
+        return 'superalts-xxxxxxxxxx-xxxxxxxxxx-xxxxxxxxxx'.replace(/[xy]/g, function (c) {
+            const r = (Math.random() * 16) | 0;
+            const v = c === 'x' ? r : (r & 0x3) | 0x8;
+            return v.toString(16);
+        });
+    }
+
+    const addNewLicense = async (licenseKey, productCode, userId) => {
+        const newLicense = {
+            licenseKey,
+            productCode,
+            userId,
+        }
+
+        const res = await fetch('/api/admin/licenses/addLicense', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(newLicense)
+        });
+    }
+
+    const sendProductDeliveryData = async (paymentMethod) => {
+        try {
+            // Generate license keys for all products
+            const licenses = cart.map(() => generateLicenseKey());
+            
+            // Prepare product names and license keys
+            const productNames = cart.map(product => product.productName).join(',');
+            const licenseKeys = licenses.join(',');
+            
+            // Prepare the request body
+            const deliveryData = {
+                userid: session.user.id,
+                paymentmethod: paymentMethod,
+                products: productNames,
+                licenses: licenseKeys,
+                coupon: couponCode || null,
+                tax: feePrice,
+                total: totalPrice
+            };
+
+            // Send POST request to product delivery API
+            const res = await fetch('/api/payment/productdelivery', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(deliveryData)
+            });
+
+            if (!res.ok) {
+                console.error('Failed to send product delivery data:', res.status);
+            } else {
+                console.log('Product delivery data sent successfully');
+            }
+        } catch (error) {
+            console.error('Error sending product delivery data:', error);
+        }
+    }
+
+    const handlePaymentSuccess = async (paymentMethod) => {
+        showPaymentModal('✅ تم الدفع بنجاح!');
+        
+        // Create licenses for each product in cart
+        cart.forEach(cartProduct => {
+            const licenseKey = generateLicenseKey();
+            addNewLicense(licenseKey, cartProduct.productCode, session.user.id);
+        });
+
+        // Send product delivery data
+        await sendProductDeliveryData(paymentMethod);
+
+        setCart([]); // Clear the cart
+    }
+
+    const handlePaymentFailure = (message = '❌ فشل الدفع.') => {
+        showPaymentModal(message);
+    }
+
+    const handlePaymentError = (message = '⚠️ حدث خطأ أثناء التحقق من الدفع.') => {
+        showPaymentModal(message);
+    }
+
 
     const handleZiinaPay = async () => {
         try {
@@ -126,11 +212,42 @@ export default function Cart({ cart, setCart }) {
             if (data.redirect_url) {
                 const width = 600;
                 const height = 800;
-                window.open(
+                const paymentWindow = window.open(
                     data.redirect_url,
                     '_blank',
                     `width=${width},height=${height},left=${(window.innerWidth - width) / 2 + window.screenX},top=${(window.innerHeight - height) / 2 + window.screenY}`
                 );
+
+                // Monitor payment status
+                const checkPaymentStatus = async (paymentIntentId) => {
+                    try {
+                        const statusRes = await fetch(`/api/payment/ziina/status?id=${paymentIntentId}`);
+                        const statusData = await statusRes.json();
+
+                        if (statusData.status === 'paid') {
+                            handlePaymentSuccess('Ziina');
+                            paymentWindow.close();
+                        } else if (statusData.status === 'failed') {
+                            handlePaymentFailure();
+                            paymentWindow.close();
+                        } else {
+                            // Still pending, check again in 2 seconds
+                            setTimeout(() => checkPaymentStatus(paymentIntentId), 2000);
+                        }
+                    } catch (err) {
+                        console.error('Error checking payment status:', err);
+                        handlePaymentError('⚠️ حدث خطأ أثناء التحقق من حالة الدفع.');
+                        paymentWindow.close();
+                    }
+                };
+
+                // Start checking payment status after a short delay
+                setTimeout(() => {
+                    if (data.payment_intent_id) {
+                        checkPaymentStatus(data.payment_intent_id);
+                    }
+                }, 3000);
+
             } else {
                 alert('Failed to initiate Ziina payment');
             }
@@ -142,7 +259,23 @@ export default function Cart({ cart, setCart }) {
 
 
     return (
-        <div className="cart-slider offcanvas offcanvas-end text-bg-dark" tabIndex="-1" id="cartDrawer">
+        <>
+            {/* Payment Status Modal */}
+            <div className="modal fade" id="paymentStatusModal" tabIndex="-1" aria-labelledby="paymentStatusModalLabel" aria-hidden="true">
+                <div className="modal-dialog modal-dialog-centered">
+                    <div className="modal-content bg-dark text-white">
+                        <div className="modal-header border-secondary">
+                            <h5 className="modal-title" id="paymentStatusModalLabel">حالة الدفع</h5>
+                            <button type="button" className="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div className="modal-body text-center">
+                            <div id="paymentMessage" className="fs-5">جارٍ التحقق من حالة الدفع...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div className="cart-slider offcanvas offcanvas-end text-bg-dark" tabIndex="-1" id="cartDrawer">
             <div className="offcanvas-header d-flex justify-content-between">
                 <h5 className="offcanvas-title">سلة التسوق</h5>
                 <button type="button" className="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
@@ -204,10 +337,7 @@ export default function Cart({ cart, setCart }) {
                                 onApprove={(data, actions) => {
                                     return actions.order.capture().then((details) => {
                                         // Show the modal immediately
-                                        const modal = new bootstrap.Modal(document.getElementById('paymentStatusModal'));
-                                        const messageEl = document.getElementById('paymentMessage');
-                                        modal.show();
-                                        messageEl.textContent = 'جارٍ التحقق من حالة الدفع...';
+                                        showPaymentModal('جارٍ التحقق من حالة الدفع...');
 
                                         // Send orderID to backend for verification
                                         fetch('/api/payment/paypal/verify', {
@@ -218,36 +348,13 @@ export default function Cart({ cart, setCart }) {
                                             .then(res => res.json())
                                             .then(result => {
                                                 if (result.success) {
-                                                    messageEl.textContent = '✅ تم الدفع بنجاح!';
-                                                    setCart([]); // Clear the cart
-                                                    const addNewLicence = async (licenseKey, productCode, userId) => {
-                                                        const newLicense = {
-                                                            licenseKey,
-                                                            productCode,
-                                                            userId,
-                                                        }
-
-                                                        const res = await fetch('/api/admin/licenses/addLicense', {
-                                                            method: 'POST',
-                                                            headers: { 'Content-Type': 'application/json' },
-                                                            body: JSON.stringify(newLicense)
-                                                        });
-                                                    }
-
-                                                    cart.foreach(cartProduct => {
-                                                        const licenseKey = 'superalts-xxxxxxxxxx-xxxxxxxxxx-xxxxxxxxxx'.replace(/[xy]/g, function (c) {
-                                                            const r = (Math.random() * 16) | 0;
-                                                            const v = c === 'x' ? r : (r & 0x3) | 0x8;
-                                                            return v.toString(16);
-                                                        });
-                                                        addNewLicence(licenseKey, cartProduct.productCode, session.user.id)
-                                                    })
+                                                    handlePaymentSuccess('PayPal');
                                                 } else {
-                                                    messageEl.textContent = '❌ فشل التحقق من الدفع.';
+                                                    handlePaymentFailure('❌ فشل التحقق من الدفع.');
                                                 }
                                             })
                                             .catch(() => {
-                                                messageEl.textContent = '⚠️ حدث خطأ أثناء التحقق من الدفع.';
+                                                handlePaymentError();
                                             });
                                     });
                                 }}
@@ -257,5 +364,6 @@ export default function Cart({ cart, setCart }) {
                 </div>
             </div>
         </div>
+        </>
     )
 }
