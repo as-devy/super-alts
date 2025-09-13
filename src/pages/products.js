@@ -7,7 +7,8 @@ import 'react-toastify/dist/ReactToastify.css';
 import Header from "./components/layouts/Header";
 import Cart from "./components/sections/Cart";
 
-export default function Products({ cart, setCart, session }) {
+export default function Products({ cart, setCart }) {
+    const { data: session, status } = useSession();
     const [products, setProducts] = useState([]);
     const [userLicenses, setUserLicensess] = useState([]);
     const [selectedProduct, setSelectedProduct] = useState({});
@@ -140,7 +141,7 @@ export default function Products({ cart, setCart, session }) {
             return;
         }
         setCart([...cart, product]);
-        toast.success(`تم إضافة "${product.productName}" إلى السلة بنجاح!`);
+        toast.success(`تم إضافة "${product.productName}" إلى السلة !`);
     }
 
     // Helper function to render add to cart button based on user state
@@ -210,7 +211,10 @@ export default function Products({ cart, setCart, session }) {
                                     <p>{product.productDesc || "لا يوجد وصف"}</p>
                                 </div>
                                 <div className="info d-flex justify-content-between align-items-center">
-                                    <span className="price">{product.productPrice}$</span>
+                                    <div className="d-flex gap-1">
+                                        <span className="price">{product.productPrice}$</span>
+                                        {product.productSale ? <span className="price" style={{ textDecoration: "line-through", opacity: "0.8", color: "#777777" }}>{product.productSale}$</span> : ""}
+                                    </div>
                                     <div className="btns d-flex gap-2">
                                         {renderAddToCartButton(product)}
 
@@ -239,7 +243,11 @@ export default function Products({ cart, setCart, session }) {
                     <div className="content">
                         <div className="row_text" style={{ borderBottom: "1px solid #777777", paddingBottom: "20px" }}>
                             <h2>{selectedProduct.productName}</h2>
-                            <h2 className="price">${selectedProduct.productPrice}</h2>
+                            <h3 className="price d-flex gap-1">
+                                <span>{selectedProduct.productPrice}$</span>
+                                {selectedProduct.productSale ? <span style={{ textDecoration: "line-through", opacity: "0.8", color: "#777777" }}>{selectedProduct.productSale}$</span> : ""}
+                            </h3>
+                            {/* <h2 className="">${selectedProduct.productPrice}</h2> */}
                         </div>
                         <div className="row_text gap-4" style={{ height: "50%" }}>
                             <h4 style={{ color: "#e7e7e7" }}>وصف المنتج</h4>

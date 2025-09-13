@@ -21,7 +21,7 @@ export default function Home({ cart, setCart, session }) {
       <Hero />
       <Achievements />
       <Aboutus />
-      <Products />
+      <Products cart={cart} setCart={setCart} />
       <Testimonials />
       <Footer />
     </>

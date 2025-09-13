@@ -125,6 +125,7 @@
     border-radius: .7rem;
     transition: .3s;
     border: 1px solid #8d8d8d;
+    justify-content: center;
 }
 
 .products-page .view_product .content button:hover {
