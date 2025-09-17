@@ -64,12 +64,29 @@ export default function Products({ cart, setCart }) {
     useEffect(() => {
         if (!payment_intent_id) return;
 
-        const modal = new bootstrap.Modal(document.getElementById('paymentStatusModal'));
+        const closeAllOpenOverlays = () => {
+            try {
+                document.querySelectorAll('.modal.show').forEach((el) => {
+                    const instance = bootstrap.Modal.getInstance(el) || new bootstrap.Modal(el);
+                    instance.hide();
+                });
+                document.querySelectorAll('.offcanvas.show').forEach((el) => {
+                    const instance = bootstrap.Offcanvas.getInstance(el) || new bootstrap.Offcanvas(el);
+                    instance.hide();
+                });
+            } catch (e) {
+                console.error('Failed to close overlays:', e);
+            }
+        }
+
+        const modalEl = document.getElementById('paymentStatusModal');
         const messageEl = document.getElementById('paymentMessage');
         const timeoutId = setTimeout(async () => {
             try {
-                modal.show();
+                closeAllOpenOverlays();
+                const modal = new bootstrap.Modal(modalEl);
                 messageEl.textContent = 'جارٍ التحقق من حالة الدفع...';
+                modal.show();
 
                 const res = await fetch(`/api/payment/ziina/status?id=${payment_intent_id}`);
                 const data = await res.json();
@@ -85,22 +102,46 @@ export default function Products({ cart, setCart }) {
                             return v.toString(16);
                         });
 
-                    // Add licenses in parallel
-                    await Promise.all(
-                        cart.map(cartProduct => {
-                            const newLicense = {
-                                licenseKey: generateLicenseKey(),
-                                productCode: cartProduct.productCode,
-                                userId: session.user.id,
-                            };
+                    // Add licenses in parallel with error handling
+                    try {
+                        const licenseResults = await Promise.all(
+                            cart.map(async (cartProduct) => {
+                                const newLicense = {
+                                    licenseKey: generateLicenseKey(),
+                                    productCode: cartProduct.productCode,
+                                    userId: session.user.id,
+                                };
 
-                            return fetch('/api/admin/licenses/addLicense', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify(newLicense),
-                            });
-                        })
-                    );
+                                const res = await fetch('/api/admin/licenses/addLicense', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify(newLicense),
+                                });
+
+                                if (!res.ok) {
+                                    const errorData = await res.json();
+                                    console.error('Failed to create license:', errorData);
+                                    throw new Error(`Failed to create license: ${errorData.error || res.statusText}`);
+                                }
+
+                                return { success: true, data: await res.json() };
+                            })
+                        );
+
+                        // Check if all licenses were created successfully
+                        const failedLicenses = licenseResults.filter(result => !result.success);
+                        if (failedLicenses.length > 0) {
+                            console.error('Some licenses failed to create:', failedLicenses);
+                            messageEl.textContent = '⚠️ تم الدفع بنجاح، لكن حدث خطأ في إنشاء بعض التراخيص. يرجى التواصل مع الدعم الفني.';
+                            return;
+                        }
+
+                        messageEl.textContent = '✅ تم الدفع وإنشاء التراخيص بنجاح!';
+                    } catch (error) {
+                        console.error('Error creating licenses:', error);
+                        messageEl.textContent = '⚠️ تم الدفع بنجاح، لكن حدث خطأ في إنشاء التراخيص. يرجى التواصل مع الدعم الفني.';
+                        return;
+                    }
 
                     // Clear cart, reload page or redirect
                     window.location.reload();
@@ -188,7 +229,7 @@ export default function Products({ cart, setCart }) {
                 <link rel="icon" href="/favicon.ico" />
             </Head>
             <Header activeLink={"products"} />
-            <Cart cart={cart} setCart={setCart} session={session} />
+            <Cart cart={cart} setCart={setCart} />
             <div className="container-fluid my-4" style={{ margin: "0 auto !important" }}>
                 <div className="row gap-4 justify-content-center">
                     {products.map((product, i) => (

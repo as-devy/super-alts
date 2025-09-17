@@ -1,8 +1,10 @@
 import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
 import { useEffect, useState } from 'react';
 import { toast, ToastContainer } from 'react-toastify';
+import { useSession } from 'next-auth/react';
 
-export default function Cart({ cart, setCart, session }) {
+export default function Cart({ cart, setCart }) {
+    const { data: session, status } = useSession();
     const [totalPrice, setTotalPrice] = useState(0);
     const [feePrice, setFeePrice] = useState(0);
     const [coupon, setCoupon] = useState(null);
@@ -88,11 +90,38 @@ export default function Cart({ cart, setCart, session }) {
     }
 
     // Common functions for post-payment handling
+    const closeAllOpenOverlays = () => {
+        try {
+            // Close any open modals
+            document.querySelectorAll('.modal.show').forEach((el) => {
+                const instance = bootstrap.Modal.getInstance(el) || new bootstrap.Modal(el);
+                instance.hide();
+            });
+            // Close any open offcanvas drawers
+            document.querySelectorAll('.offcanvas.show').forEach((el) => {
+                const instance = bootstrap.Offcanvas.getInstance(el) || new bootstrap.Offcanvas(el);
+                instance.hide();
+            });
+        } catch (e) {
+            console.error('Failed to close overlays:', e);
+        }
+    }
+
     const showPaymentModal = (message) => {
-        const modal = new bootstrap.Modal(document.getElementById('paymentStatusModal'));
+        closeAllOpenOverlays();
+        const modalEl = document.getElementById('paymentStatusModal');
         const messageEl = document.getElementById('paymentMessage');
-        modal.show();
-        messageEl.textContent = message;
+        if (!modalEl || !messageEl) return;
+        // Slight delay to allow previous overlays to close animation
+        setTimeout(() => {
+            try {
+                const modal = new bootstrap.Modal(modalEl);
+                messageEl.textContent = message;
+                modal.show();
+            } catch (e) {
+                console.error('Failed to show payment modal:', e);
+            }
+        }, 150);
     }
 
     const generateLicenseKey = () => {
@@ -104,17 +133,32 @@ export default function Cart({ cart, setCart, session }) {
     }
 
     const addNewLicense = async (licenseKey, productCode, userId) => {
-        const newLicense = {
-            licenseKey,
-            productCode,
-            userId,
-        }
+        try {
+            const newLicense = {
+                licenseKey,
+                productCode,
+                userId,
+            }
 
-        const res = await fetch('/api/admin/licenses/addLicense', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(newLicense)
-        });
+            const res = await fetch('/api/admin/licenses/addLicense', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newLicense)
+            });
+
+            if (!res.ok) {
+                const errorData = await res.json();
+                console.error('Failed to create license:', errorData);
+                throw new Error(`Failed to create license: ${errorData.error || res.statusText}`);
+            }
+
+            const data = await res.json();
+            console.log('License created successfully:', data);
+            return { success: true, data };
+        } catch (error) {
+            console.error('Error creating license:', error);
+            return { success: false, error: error.message };
+        }
     }
 
     const sendProductDeliveryData = async (paymentMethod) => {
@@ -155,18 +199,33 @@ export default function Cart({ cart, setCart, session }) {
     }
 
     const handlePaymentSuccess = async (paymentMethod) => {
-        showPaymentModal('✅ تم الدفع بنجاح!');
-        
-        // Create licenses for each product in cart
-        cart.forEach(cartProduct => {
-            const licenseKey = generateLicenseKey();
-            addNewLicense(licenseKey, cartProduct.productCode, session.user.id);
-        });
+        try {
+            // Create licenses for each product in cart
+            const licenseResults = await Promise.all(
+                cart.map(async (cartProduct) => {
+                    const licenseKey = generateLicenseKey();
+                    return await addNewLicense(licenseKey, cartProduct.productCode, session.user.id);
+                })
+            );
 
-        // Send product delivery data
-        await sendProductDeliveryData(paymentMethod);
+            // Check if all licenses were created successfully
+            const failedLicenses = licenseResults.filter(result => !result.success);
+            if (failedLicenses.length > 0) {
+                console.error('Some licenses failed to create:', failedLicenses);
+                showPaymentModal('⚠️ تم الدفع بنجاح، لكن حدث خطأ في إنشاء بعض التراخيص. يرجى التواصل مع الدعم الفني.');
+                return;
+            }
 
-        setCart([]); // Clear the cart
+            // Send product delivery data
+            await sendProductDeliveryData(paymentMethod);
+
+            // Clear the cart only after successful license creation
+            setCart([]);
+            showPaymentModal('✅ تم الدفع وإنشاء التراخيص بنجاح!');
+        } catch (error) {
+            console.error('Error in payment success handling:', error);
+            showPaymentModal('⚠️ تم الدفع بنجاح، لكن حدث خطأ في معالجة الطلب. يرجى التواصل مع الدعم الفني.');
+        }
     }
 
     const handlePaymentFailure = (message = '❌ فشل الدفع.') => {

@@ -127,7 +127,7 @@ section {
 }
 
 .payment_btns form.disbaled input,
-.payment_btns form.disbaled button{
+.payment_btns form.disbaled button {
   cursor: no-drop;
 }
 
@@ -148,4 +148,9 @@ section {
   justify-content: center;
   min-height: 100vh;
   margin: 0 auto !important;
+}
+
+#paymentStatusModal .modal-header {
+  display: flex;
+  justify-content: space-between;
 }

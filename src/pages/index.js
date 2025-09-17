@@ -8,7 +8,7 @@ import Testimonials from "./components/sections/Testimonials";
 import Footer from "./components/layouts/Footer";
 import Cart from "./components/sections/Cart";
 
-export default function Home({ cart, setCart, session }) {
+export default function Home({ cart, setCart }) {
   return (
     <>
       <Head>
@@ -17,7 +17,7 @@ export default function Home({ cart, setCart, session }) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
       <Header activeLink={"home"} />
-      <Cart cart={cart} setCart={setCart} session={session} />
+      <Cart cart={cart} setCart={setCart} />
       <Hero />
       <Achievements />
       <Aboutus />
