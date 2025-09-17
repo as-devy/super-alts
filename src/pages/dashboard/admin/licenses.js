@@ -64,7 +64,7 @@ export default function Licenses() {
         searchQuery
     } = useLicenses('/api/admin/licenses/licenses');
 
-    const handleRemoveLicense = async () => {
+    const handleRemoveLicense = async (licenseKeyArg) => {
         try {
             const res = await fetch("/api/admin/licenses/removeLicense", {
                 method: "DELETE",
@@ -72,22 +72,35 @@ export default function Licenses() {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    licenseKey: currentModifyLicenseKey,
+                    licenseKey: licenseKeyArg || currentModifyLicenseKey,
                 }),
             });
 
             const data = await res.json();
-
+            console.log(data)
             if (res.ok) {
                 toast.success("تم حذف الرخصة");
                 setLicenses((prevLicenses) =>
-                    prevLicenses.filter((license) => license.licenseKey !== currentModifyLicenseKey)
+                    prevLicenses.filter((license) => license.licenseKey !== (licenseKeyArg || currentModifyLicenseKey))
                 );
+
             } else {
                 toast.error("فشل في إزالة الرخصة");
             }
         } catch (error) {
             toast.error("فشل في إزالة الرخصة");
+        }
+    };
+
+    const handleMultiRemoveLicenses = async () => {
+        try {
+            for (const lic of currentModifyLicenses) {
+                await handleRemoveLicense(lic.licenseKey);
+            }
+        } 
+        finally {
+            setCurrentModifyLicenses([]);
+            setCurrentModifyLicenseKey(null);
         }
     };
 
@@ -149,6 +162,14 @@ export default function Licenses() {
                                                 onClick={handleMultiRegenerateLicense}
                                             >
                                                 إعادة توليد الرخص
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <button
+                                                type="button"
+                                                onClick={handleMultiRemoveLicenses}
+                                            >
+                                                 حذف الرخص
                                             </button>
                                         </li>
                                     </ul>
