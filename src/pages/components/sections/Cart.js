@@ -199,6 +199,7 @@ export default function Cart({ cart, setCart }) {
     }
 
     const handlePaymentSuccess = async (paymentMethod) => {
+        showPaymentModal('يتم التحقق من حالة الدفع ...');
         try {
             // Create licenses for each product in cart
             const licenseResults = await Promise.all(
@@ -282,6 +283,8 @@ export default function Cart({ cart, setCart }) {
                     try {
                         const statusRes = await fetch(`/api/payment/ziina/status?id=${paymentIntentId}`);
                         const statusData = await statusRes.json();
+
+                        console.log(statusData)
 
                         if (statusData.status === 'paid') {
                             handlePaymentSuccess('Ziina');
