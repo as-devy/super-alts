@@ -262,7 +262,7 @@ export default function Cart({ cart, setCart }) {
                 body: JSON.stringify({
                     amount: amountInFils,
                     currency_code: 'AED',
-                    description: 'Order payment'
+                    message: 'Order payment'
                 })
             });
 
@@ -286,13 +286,17 @@ export default function Cart({ cart, setCart }) {
 
                         console.log(statusData)
 
-                        if (statusData.status === 'paid') {
+                        if (statusData.status === 'completed') {
                             handlePaymentSuccess('Ziina');
                             paymentWindow.close();
-                        } else if (statusData.status === 'failed') {
+                        } else if (statusData.status === 'failed' || statusData.status === 'canceled') {
                             handlePaymentFailure();
                             paymentWindow.close();
+                        } else if (statusData.status === 'pending' || statusData.status === 'requires_payment_instrument' || statusData.status === 'requires_user_action') {
+                            // Still pending, check again in 2 seconds
+                            setTimeout(() => checkPaymentStatus(paymentIntentId), 2000);
                         } else {
+                            console.log('Unknown payment status:', statusData.status);
                             // Still pending, check again in 2 seconds
                             setTimeout(() => checkPaymentStatus(paymentIntentId), 2000);
                         }

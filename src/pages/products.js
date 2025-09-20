@@ -91,7 +91,7 @@ export default function Products({ cart, setCart }) {
                 const res = await fetch(`/api/payment/ziina/status?id=${payment_intent_id}`);
                 const data = await res.json();
 
-                if (data.status === 'paid') {
+                if (data.status === 'completed') {
                     messageEl.textContent = '✅ تم الدفع بنجاح!';
 
                     // Helper function to generate license key

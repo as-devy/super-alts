@@ -1,9 +1,8 @@
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
 
-  const { amount, description } = req.body;
+  const { amount, currency_code, message } = req.body;
   const accessToken = process.env.ZIINA_ACCESS_TOKEN;
-  const currency_code = process.env.ZIINA_PREFERRED_CURRENCY || 'USD';
   
   const redirectUrl = process.env.ZIINA_REDIRECT_URL;
 
@@ -15,8 +14,8 @@ export default async function handler(req, res) {
     },
     body: JSON.stringify({
       amount: amount,
-      currency_code,
-      description,
+      currency_code: currency_code || 'AED',
+      message: message || 'Order payment',
       ...(redirectUrl && { redirect_url: redirectUrl })
     })
   });
